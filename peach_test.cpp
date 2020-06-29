@@ -1,6 +1,9 @@
 // See LICENSE for license details
 #include <peach_options.h>
 #include <peach_stdin.h>
+extern "C" {
+#include <cv_main.h>
+}
 #include <stdio.h>
 static void dump_word(peach_word const * p_word) {
     peach_buffer const & r_buffer =
@@ -46,18 +49,22 @@ static void read_stdin() {
     }
 }
 int main(int argc, char** argv) {
-    if (argc > 0) {
-        peach_options * p_options = new peach_options;
-        if (p_options) {
+    cv_options * p_cave_options = cv_main_init(argc, argv);
+    if (p_cave_options) {
+        if (argc > 0) {
             unsigned int const i_arg_count = argc & 0x7fff;
             char const * const * p_arg_vector = argv;
-            if (p_options->f_init(i_arg_count, p_arg_vector)) {
-                dump_options(p_options);
-                read_stdin();
-                p_options->f_cleanup();
+            peach_options * p_options = new peach_options;
+            if (p_options) {
+                if (p_options->f_init(i_arg_count, p_arg_vector)) {
+                    dump_options(p_options);
+                    read_stdin();
+                    p_options->f_cleanup();
+                }
+                delete p_options;
             }
-            delete p_options;
         }
+        cv_main_cleanup(p_cave_options);
     }
     return 0;
 }

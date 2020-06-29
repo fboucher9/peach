@@ -7,11 +7,7 @@ cave_src ?= $(peach_src)/../cave
 
 peach_srcs := \
 peach_test.cpp \
-peach_options.cpp \
-peach_buffer.cpp \
 peach_object.cpp \
-peach_word.cpp \
-peach_list.cpp \
 peach_stdin.cpp
 
 peach_objs := $(addprefix $(peach_dst)/,$(peach_srcs:=.o))
@@ -133,12 +129,18 @@ $(peach_dst)/test.exe : $(peach_objs) $(cave_objs) $(peach_src)/makefile | $(pea
 
 $(peach_dst)/%.cpp.o : $(peach_src)/%.cpp $(peach_src)/makefile | $(peach_dst)
 	@echo compiling $<
-	@clang -c -o $@ $(peach_flags) $<
+	@clang -c -o $@ $(peach_flags) -MMD $<
 
 $(peach_dst)/%.c.o : $(cave_src)/%.c $(peach_src)/makefile
 	@echo compiling $<
 	-@mkdir -p $(dir $@)
-	@clang -c -o $@ $(cave_flags) $<
+	@clang -c -o $@ $(cave_flags) -MMD $<
 
 $(peach_dst) :
 	-mkdir -p $(peach_dst)
+
+peach_deps_abs := $(addprefix $(peach_dst)/,$(peach_srcs:=.d))
+
+cave_deps_abs := $(addprefix $(peach_dst)/,$(cave_srcs:=.d))
+
+-include $(peach_deps_abs) $(cave_deps_abs)
